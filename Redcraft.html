@@ -1,0 +1,347 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Redcraft</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: one dark stage, animated red block grid behind a left-aligned stack: status bar, name, hazard stripe, contact. */
+  :root {
+    --bg: #0d0707;
+    --fg: #f7ede9;
+    --muted: #a8908a;
+    --red: #e5262b;
+    --red-hot: #ff4a3d;
+    --line: rgba(247, 237, 233, 0.14);
+    --font-display: "Bricolage Grotesque", "Arial Black", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { min-height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-display);
+    font-size: 16px;
+    line-height: 1.5;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 0;
+    overflow-x: hidden;
+  }
+  #bg {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .veil {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+      radial-gradient(120% 90% at 0% 100%, var(--bg) 0%, rgba(13, 7, 7, 0.82) 38%, rgba(13, 7, 7, 0) 78%),
+      linear-gradient(180deg, rgba(13, 7, 7, 0.7), rgba(13, 7, 7, 0) 22%);
+  }
+  .stage {
+    position: relative;
+    z-index: 2;
+    min-height: 100vh;
+    max-width: 72rem;
+    margin: 0 auto;
+    padding-block: 24px 32px;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 48px;
+  }
+
+  /* top bar */
+  .bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 24px;
+  }
+  .mark {
+    font-weight: 800;
+    font-size: 1.25rem;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .mark i {
+    width: 22px;
+    height: 22px;
+    background: var(--red);
+    display: block;
+    transform: rotate(45deg) scale(0.8);
+    animation: spin 9s linear infinite;
+  }
+  .status {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--line);
+    padding: 8px 14px;
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--red-hot);
+    box-shadow: 0 0 0 0 rgba(255, 74, 61, 0.7);
+    animation: pulse 1.8s ease-out infinite;
+  }
+
+  /* hero */
+  .hero {
+    align-self: center;
+    display: grid;
+    gap: 28px;
+    min-width: 0;
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red-hot);
+  }
+  h1 {
+    margin: 0;
+    font-weight: 800;
+    font-size: clamp(2.6rem, 13.5vw, 9.5rem);
+    line-height: 0.92;
+    letter-spacing: -0.045em;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+  }
+  h1 .tld {
+    color: var(--red);
+    background: linear-gradient(100deg, var(--red) 30%, var(--red-hot) 50%, var(--red) 70%);
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: sheen 5s ease-in-out infinite;
+  }
+  .lead {
+    margin: 0;
+    max-width: 34rem;
+    font-size: clamp(1.1rem, 3.4vw, 1.5rem);
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--fg);
+    text-wrap: pretty;
+  }
+  .lead span { color: var(--muted); }
+  .tape {
+    width: min(100%, 34rem);
+    height: 12px;
+    border: 1px solid var(--line);
+    background:
+      repeating-linear-gradient(-45deg, var(--red) 0 12px, var(--bg) 12px 24px);
+    background-size: 34px 34px;
+    animation: tape 1.4s linear infinite;
+  }
+
+  /* contact */
+  .contact {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px 32px;
+    border-top: 1px solid var(--line);
+    padding-top: 24px;
+  }
+  .contact-main { min-width: 0; display: grid; gap: 8px; }
+  .label {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .mail {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: clamp(1.05rem, 5vw, 2rem);
+    color: var(--fg);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+    background: linear-gradient(var(--red), var(--red)) 0 100% / 0% 2px no-repeat;
+    transition: background-size 0.35s ease, color 0.2s ease;
+    padding-bottom: 2px;
+    user-select: all;
+  }
+  .mail:hover, .mail:focus-visible { background-size: 100% 2px; color: var(--red-hot); }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+  .btn {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg);
+    background: transparent;
+    border: 1px solid var(--line);
+    padding: 12px 18px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  }
+  .btn:hover { border-color: var(--red); transform: translateY(-2px); }
+  .btn.solid { background: var(--red); border-color: var(--red); color: #fff; }
+  .btn.solid:hover { background: var(--red-hot); border-color: var(--red-hot); }
+  .btn:focus-visible, .mail:focus-visible { outline: 2px solid var(--red-hot); outline-offset: 3px; }
+  .foot {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+
+  /* entrance: visible at rest, just slides up on load */
+  .rise { animation: rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  .d1 { animation-delay: 0.05s; } .d2 { animation-delay: 0.15s; }
+  .d3 { animation-delay: 0.28s; } .d4 { animation-delay: 0.4s; } .d5 { animation-delay: 0.52s; }
+
+  @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+  @keyframes pulse { 70% { box-shadow: 0 0 0 10px rgba(255, 74, 61, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 74, 61, 0); } }
+  @keyframes spin { to { transform: rotate(405deg) scale(0.8); } }
+  @keyframes tape { to { background-position: 34px 0; } }
+  @keyframes sheen { 0%, 100% { background-position: 100% 0; } 50% { background-position: 0 0; } }
+
+  @media (max-width: 520px) {
+    .stage { gap: 36px; }
+    .btn { flex: 1 1 auto; text-align: center; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<canvas id="bg" aria-hidden="true"></canvas>
+<div class="veil" aria-hidden="true"></div>
+
+<div class="stage">
+  <header class="bar rise d1">
+    <div class="mark"><i></i>Redcraft</div>
+    <div class="status"><span class="dot"></span>Under construction</div>
+  </header>
+
+  <main class="hero">
+    <div class="eyebrow rise d2">Work in progress</div>
+    <h1 class="rise d3">Redcraft<span class="tld">.me</span></h1>
+    <p class="lead rise d4">Under construction. <span>Something new is being built here.</span></p>
+    <div class="tape rise d4" role="presentation"></div>
+  </main>
+
+  <footer class="rise d5">
+    <section class="contact" aria-labelledby="contact-label">
+      <div class="contact-main">
+        <div class="label" id="contact-label">Contact</div>
+        <a class="mail" id="mail" href="mailto:redcraft@redcraft.me">redcraft@redcraft.me</a>
+      </div>
+      <div class="actions">
+        <button class="btn solid" id="copy" type="button">Copy address</button>
+        <a class="btn" href="mailto:redcraft@redcraft.me">Write an email</a>
+      </div>
+    </section>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var canvas = document.getElementById('bg');
+  var ctx = canvas.getContext('2d');
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var cell = 34, w = 0, h = 0, dpr = 1, mx = -9999, my = -9999, tx = -9999, ty = -9999;
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = window.innerWidth;
+    h = window.innerHeight;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cell = w < 520 ? 28 : 34;
+    if (reduce) draw(0);
+  }
+
+  function draw(t) {
+    ctx.clearRect(0, 0, w, h);
+    var cols = Math.ceil(w / cell) + 1, rows = Math.ceil(h / cell) + 1;
+    mx += (tx - mx) * 0.12;
+    my += (ty - my) * 0.12;
+    for (var j = 0; j < rows; j++) {
+      for (var i = 0; i < cols; i++) {
+        var cx = i * cell + cell / 2, cy = j * cell + cell / 2;
+        var wave = Math.sin(i * 0.22 - j * 0.17 + t * 0.0007) * Math.sin(i * 0.09 + j * 0.13 - t * 0.0004);
+        var v = Math.pow(Math.max(0, wave), 2);
+        var dx = cx - mx, dy = cy - my;
+        var p = Math.max(0, 1 - Math.sqrt(dx * dx + dy * dy) / 200);
+        var k = Math.max(v * 0.55, p * p);
+        var s = cell - 6;
+        var x = i * cell + 3, y = j * cell + 3;
+        ctx.strokeStyle = 'rgba(229,38,43,' + (0.07 + k * 0.6).toFixed(3) + ')';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x + 0.5, y + 0.5, s, s);
+        if (k > 0.12) {
+          ctx.fillStyle = 'rgba(255,74,61,' + (k * 0.55).toFixed(3) + ')';
+          var inset = (1 - Math.min(1, k * 1.6)) * (s / 2 - 2);
+          ctx.fillRect(x + inset, y + inset, s - inset * 2, s - inset * 2);
+        }
+      }
+    }
+  }
+
+  function loop(t) { draw(t); requestAnimationFrame(loop); }
+
+  window.addEventListener('resize', resize);
+  window.addEventListener('pointermove', function (e) {
+    tx = e.clientX; ty = e.clientY;
+    if (mx < -5000) { mx = tx; my = ty; }
+  }, { passive: true });
+  window.addEventListener('pointerleave', function () { tx = -9999; ty = -9999; });
+
+  resize();
+  if (!reduce) requestAnimationFrame(loop);
+
+  // copy button
+  var btn = document.getElementById('copy');
+  var mail = document.getElementById('mail');
+  var addr = 'redcraft@redcraft.me';
+  function selectText() {
+    var r = document.createRange();
+    r.selectNodeContents(mail);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(r);
+  }
+  btn.addEventListener('click', function () {
+    var done = function (msg) {
+      btn.textContent = msg;
+      setTimeout(function () { btn.textContent = 'Copy address'; }, 1800);
+    };
+    try {
+      navigator.clipboard.writeText(addr).then(function () { done('Copied'); }, function () { selectText(); done('Selected'); });
+    } catch (e) {
+      selectText(); done('Selected');
+    }
+  });
+})();
+</script>
+
+</body></html>
